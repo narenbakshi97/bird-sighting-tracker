@@ -1,0 +1,238 @@
+{% extends "layout.html" %}
+
+{% block title %}Contribute{% endblock %}
+
+{% block style %} 
+<!--key = AIzaSyB3mFryyb9OOwK9droJNWaFFIXqoTGd78Q-->
+ <style>
+    #map-canvas {
+        width: 100%;
+        height: 400px;
+        background-color: grey;
+      }
+    body{
+        background-image:url('https://s-media-cache-ak0.pinimg.com/736x/ed/ab/3a/edab3af5e35bac4776d839c1b0969fcd--wallpaper-art-photo-wallpaper.jpg');
+        background-repeat:no-repeat;
+        background-size:cover;
+    }
+    input{
+        background-color:transparent;
+    }
+    .blacky{
+        background-color:rgba(0,0,0,0.95);
+        margin:1% 20%;
+        padding:25px;
+        border-radius:10px;
+    }
+    footer{
+        position:static !important;
+    }
+    .control-label{
+        color:white;
+        font-size:15px;
+    }
+    
+     @media only screen and (max-width : 1024px) {
+            .blacky{
+                margin:0%;
+                padding:1%;
+            }
+        }   
+</style>
+{% endblock %}
+
+{% block main %}
+    {% if message %}
+    <div class="alert alert-info alert-dismissible" role="alert">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                   <strong>{{message}}</strong>
+    </div>
+    {% endif %}
+     <div class="blacky">
+          <div class="search text-center h4" style="color:white;">CONTRIBUTE</div>
+         <form class="form"  method="post" action='{{url_for("contribute")}}'>
+                <label for="birdName" class="control-label">What is the name of the Bird</label>
+                <div class="form-inline row">
+                    <div class="form-group col-lg-10 col-md-10 col-xs-8">
+                        <input style="width:100%;" class="col-lg-12 col-md-12 col-xs-12 form-control" list="birds" name="bird" required>
+                        <datalist id="birds">
+                        {% for row in rows %}
+                           <option>{{row.name}}</option>
+                        {% endfor %}
+                        </datalist>
+                    </div>
+                    
+                    <div class="form-group col-lg-2 col-md-2 col-xs-4">
+                        <input type="submit" value="submit" class="col-lg-12 col-md-12 col-xs-12 btn btn-primary"/>
+                    </div>
+                </div>
+            </form>
+            <form method="post" action="{{url_for('track')}}">    
+            {% if resends %}    
+            <br>
+            <span class="h1 bg-info text-info ">Click to select the option</span>
+            <div class="form-group selectBird">
+             <br><hr><br>  
+                    {% for resend in resends %}
+                            
+                        <div class="row result" style="cursor:pointer;" onclick='selected(this)'>
+                        <input required type='hidden' value="{{resend.name}}" name="bird_name">
+                        <input required type='hidden' value="{{resend.male_image}}" name="male_image">
+                        <input required type='hidden' value="{{resend.female_image}}" name="female_image">
+                        <input required type='hidden' name="username" value="{{username}}">   
+                            <div class="col-lg-4 col-md-4 col-xs-4">
+                                <img class="img-responsive" style="width:270px;height:220px;" src="{{resend.male_image}}"/>
+                                <br>
+                                <h4 class="text-center" style="color:white">Male</h4>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-xs-4">
+                                <h2 class="text-center" style="color:white;">{{resend.name}}</h2>                              
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-xs-4">
+                                <img class="img-responsive" style="width:270px;height:220px;" src="{{resend.female_image}}"/>
+                                <br>
+                                <h4 class="text-center" style="color:white">Female</h4>
+                            </div>
+                            
+                        </div>
+                        <br><hr><br>
+                    {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <br>
+                <label class="control-label">Photo Clicked at Location</label>
+                <div><small class='h4 bg-success text-success'>*To Choose the location click on it and a marker will appear there</small></div>
+            </div>      
+            <div>
+                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3mFryyb9OOwK9droJNWaFFIXqoTGd78Q&v=3.exp&libraries=places"></script>
+                <input id="pac-input" class="controls form-control col-md-8 text-center" type="text" placeholder="Enter the location name" >
+                <div class="col-md-12 col-xs-12" id="map-canvas"></div>
+                
+                <div class="text-center">
+                    <div class="form-inline row">
+                        <div class="form-group">
+                            <input readonly type="text" id="lati" placeholder="lat" class="form-control col-md-6" name="lat" required>
+                        </div>&nbsp;&nbsp;
+                        <div class="form-group">
+                            <input readonly type="text" id="long" placeholder="lon" class="form-control col-md-6" name="lon" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary btn-block">Contribute</button>
+            </div>
+        </form>
+    </div>
+    
+        <script>
+        var marker = null;
+
+    var aud = document.getElementById("audio");
+    function setHalfVolume() { 
+    aud.volume = 0.2;
+} 
+
+
+
+
+
+    function selected(obj){
+        var a = obj.innerHTML;
+        console.log(a);
+        $('.selectBird').html(a);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+ function init() {
+   var map = new google.maps.Map(document.getElementById('map-canvas'), {
+     center: {
+       lat: 0.9715987,
+       lng: 0.59456269999998
+     },
+     zoom: 1
+   });
+   
+   function placeMarker(location) {
+
+ if (marker == null)
+ {
+   marker = new google.maps.Marker({
+      position: location,
+      map: map
+  }); 
+ } 
+  else 
+  {   
+      marker.setPosition(location); 
+  }
+ // console.log(location.toString());
+  var str = location.toString();
+  var arr = [];
+  //arr.shift();
+  arr = str.split('');
+  arr.pop();
+  arr.shift();
+  str = arr.join('');
+   console.log(str);
+  arr = str.split(',');
+   console.log(arr);
+  document.getElementById("lati").value = arr[0];
+  document.getElementById("long").value = arr[1];
+  
+}
+   
+   map.addListener('click', function(e) {
+    placeMarker(e.latLng, map);
+});
+
+
+   var searchBox = new google.maps.places.SearchBox(document.getElementById('pac-input'));
+   map.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('pac-input'));
+   google.maps.event.addListener(searchBox, 'places_changed', function() {
+     searchBox.set('map', null);
+
+
+     var places = searchBox.getPlaces();
+
+     var bounds = new google.maps.LatLngBounds();
+     var i, place;
+     for (i = 0; place = places[i]; i++) {
+       (function(place) {
+         var marker = new google.maps.Marker({
+
+           position: place.geometry.location
+         });
+         marker.bindTo('map', searchBox, 'map');
+         google.maps.event.addListener(marker, 'map_changed', function() {
+           if (!this.getMap()) {
+             this.unbindAll();
+           }
+         });
+         bounds.extend(place.geometry.location);
+
+
+       }(place));
+
+     }
+     map.fitBounds(bounds);
+     searchBox.set('map', map);
+     map.setZoom(Math.min(map.getZoom(),12));
+
+   });
+ }
+ google.maps.event.addDomListener(window, 'load', init);
+    
+</script>
+{% endblock %}

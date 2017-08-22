@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8"/>
+    <meta content="initial-scale=1, width=device-width" name="viewport"/>
+
+    <!-- documentation at http://getbootstrap.com/, alternative themes at https://www.bootstrapcdn.com/bootswatch/ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+    <title>Bird Tracker: {% block title %} {% endblock %}</title>
+    {% block style %}
+    {% endblock %}
+    <style>
+        @media only screen and (max-width : 1024px) {
+            form{
+                margin:5% 25px;
+            }
+        .about{
+           padding:5px;
+           margin:0;
+        }
+        }  
+        html,body{
+            height:100%;
+        }
+    </style>
+</head>
+<body onload="setHalfVolume()" class="container-fluid">
+    <audio autoplay loop id="audio">
+      <source src="{{ url_for('static', filename='forest.mp3') }}" type="audio/ogg">
+      Your browser does not support the audio element.
+    </audio>
+
+    <nav class="row navbar navbar-inverse">
+     <div class="container">
+        
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button class="navbar-toggle collapsed" data-target="#navbar" data-toggle="collapse" type="button">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                     <a class="navbar-brand" href="{{ url_for('index', _external=True, _scheme='https') }}">Bird Sighting Tracker</a>
+                </div>
+               
+            
+             <div class="collapse navbar-collapse" id="navbar">
+                        {% if session.user_id %}
+                             <form id="myForm" action="{{url_for('fullmap', _external=True, _scheme='https')}}">
+                                <input type="hidden" id="lat" name="lat" value="51.476852"/>
+                                <input type="hidden" id="lon" name="lon" value="-0.000500"/>
+                            </form>
+
+                            <ul class="nav navbar-nav">
+                                <li><a href="#" onclick="document.getElementById('myForm').submit();">Near You</a></li>
+                                <li><a href="{{ url_for('contribute', _external=True, _scheme='https') }}">Contribute</a></li>
+                                <li><a href="{{ url_for('about', _external=True, _scheme='https') }}">About</a></li>
+                            </ul>
+                            
+                            <ul class="nav navbar-nav navbar-right">
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" onclick="fade()" data-toggle="dropdown" href="#"><i class="fa fa-bell" aria-hidden="true"></i>{% if number%}<sup id="num" style="background-color:red;color:white;border-radius:50%;padding:4px;">{{number}}</sup>{% endif %}</a>
+                                    <ul class="dropdown-menu">
+                                      {% for notification in notifications %}
+                                           {% if notification.type == "database" %}
+                                          <li><a class="bg-success text-success" href="#">{{notification.message}}</a></li>
+                                          {% else %}
+                                          <li><a class="bg-danger text-danger" href="#">{{notification.message}}</a></li>                                          
+                                          {% endif %}
+                                      {% endfor %}
+                                      {% for data in history %}
+                                          <li><a href="#">{{data.message}}</a></li>
+                                      {% endfor %}
+                                    </ul>
+                                 </li>   
+                                <li><a href="{{ url_for('logout', _external=True, _scheme='https') }}">Log Out</a></li>
+                            </ul>
+                        {% else %}
+                            <ul class="nav navbar-nav navbar-right">
+                                <li><a href="{{ url_for('register', _external=True, _scheme='https') }}">Register</a></li>
+                                <li><a href="{{ url_for('login', _external=True, _scheme='https') }}">Log In</a></li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        </nav>
+            <header>
+                {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info alert-dismissible" role="alert">
+                   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                   <strong>{% for message in messages %}
+                           {{ message }}
+                           {% endfor %}
+                   </strong>
+                </div>
+                {% endif %}
+                {% endwith %}
+            </header>
+        
+
+        <main>
+            {% block main %}{% endblock %}
+            
+        </main>
+        
+    </div>
+    <footer style="width:100%;background-color:rgba(0,0,0,0.5);padding:0.5%;color:white;position:absolute;bottom:0;left:0;">
+        <div class="text-right">   
+           CS50 Final Project Made By <a style="color:#fff;" href="http://www.narenbakshi.me"><u>Naren Bakshi</u></a>
+        </div>
+    </footer>
+
+</body>
+<script>
+var lat = 0;
+var lon = 0;
+window.onload = getLocation();
+
+    
+    var aud = document.getElementById("audio");
+    function setHalfVolume() { 
+    aud.volume = 0.2;
+} 
+
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else { 
+       lat = 51.476852;
+       lon = -0.000500;
+    }
+}
+
+function showPosition(position) {
+    lat = position.coords.latitude;
+    lon = position.coords.longitude;
+    
+    document.getElementById("lat").value = lat;
+    document.getElementById("lon").value = lon;
+}
+
+function fade(){
+    document.getElementById("num").innerHTML = "";
+    document.getElementById("num").style = null;
+}
+</script>
+</html>

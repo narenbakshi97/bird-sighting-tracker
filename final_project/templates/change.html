@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block style %}
+<style>
+    body{
+        background-image:url('https://s-media-cache-ak0.pinimg.com/originals/4e/33/a3/4e33a3b21148047c7e22cc84116ff71f.jpg');
+    }
+    input{
+        background-color:transparent;
+    }
+    form{
+        background-color:rgba(0,0,0,0.8);
+        margin:5% 30%;
+        padding:25px;
+        border-radius:10px;
+    }
+    .control-label{
+        color:white;
+        font-size:15px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <div class="text-center">
+        <form class="form" action="{{url_for('change')}}" method="post" role="form" data-toggle="validator">
+            <input type="hidden" name="email" value="{{email}}"/>
+            <div class="form-group">
+            <label for="inputPassword" class="control-label">Type New Password</label>
+            <div class="form-inline row">
+              <div class="form-group col-sm-6">
+                <input type="password" data-minlength="6" class="form-control" id="inputPassword" placeholder="Password" required name="password">
+                <div class="help-block">Minimum of 6 characters</div>
+              </div>
+              <div class="form-group col-sm-6">
+                <input type="password" class="form-control" id="inputPasswordConfirm" data-match="#inputPassword" data-match-error="Whoops, these don't match" placeholder="Confirm" required name="confirm">
+                <div class="help-block with-errors"></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+          <button name="btn" type="submit" class="btn btn-primary btn-block" value="reset">Reset Password</button>
+      </div>
+        </form>
+    </div>
+{% endblock %}
